@@ -9,7 +9,8 @@ from pathlib import Path
 
 import duckdb
 
-PASTA_PAINEL = Path("painel")
+RAIZ = Path(__file__).resolve().parent.parent
+MODELO = RAIZ / "painel" / "modelo.html"
 
 
 def _converter(valor):
@@ -163,12 +164,13 @@ def main():
     finally:
         con.close()
 
-    PASTA_PAINEL.mkdir(parents=True, exist_ok=True)
-    (PASTA_PAINEL / "dados.json").write_text(
+    saida = Path(os.environ.get("FOCUS_IPCA_PAINEL", "painel"))
+    saida.mkdir(parents=True, exist_ok=True)
+    (saida / "dados.json").write_text(
         json.dumps(dados, ensure_ascii=False, indent=2), encoding="utf-8"
     )
-    modelo = (PASTA_PAINEL / "modelo.html").read_text(encoding="utf-8")
-    (PASTA_PAINEL / "index.html").write_text(montar_html(modelo, dados), encoding="utf-8")
+    modelo = MODELO.read_text(encoding="utf-8")
+    (saida / "index.html").write_text(montar_html(modelo, dados), encoding="utf-8")
 
 
 if __name__ == "__main__":
