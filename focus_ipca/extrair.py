@@ -9,6 +9,7 @@ import time
 import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta
+from pathlib import Path
 
 import duckdb
 
@@ -53,6 +54,29 @@ def url_focus(data_inicial, skip, top):
         f"$skip={skip}",
     ]
     return f"{BASE_FOCUS}?{'&'.join(partes)}"
+
+
+def baixar_amostra(pasta):
+    """Devolve um ``baixar`` que lê os arquivos de ``pasta`` em vez de usar a rede."""
+    base = Path(pasta)
+
+    def baixar(url):
+        analisada = urllib.parse.urlparse(url)
+        consulta = urllib.parse.parse_qs(analisada.query)
+        if "bcdata.sgs." in analisada.path:
+            codigo = analisada.path.split("/")[-2].rsplit(".", 1)[-1]
+            return json.loads((base / f"sgs_{codigo}.json").read_text(encoding="utf-8"))
+        if "$skip" in consulta:
+            skip = int(consulta["$skip"][0])
+            top = int(consulta.get("$top", ["10000"])[0])
+            pagina = skip // top + 1
+            caminho = base / f"focus_pagina_{pagina}.json"
+            if not caminho.exists():
+                return {"value": []}
+            return json.loads(caminho.read_text(encoding="utf-8"))
+        raise ValueError(f"URL fora da amostra: {url}")
+
+    return baixar
 
 
 def paginar_focus(data_inicial, top=10000, baixar=baixar_json):
@@ -174,16 +198,18 @@ def main():
     pasta = os.path.dirname(caminho)
     if pasta:
         os.makedirs(pasta, exist_ok=True)
+    amostra = os.environ.get("FOCUS_IPCA_AMOSTRA")
+    baixar = baixar_amostra(amostra) if amostra else baixar_json
     con = duckdb.connect(caminho)
     try:
         criar_tabelas(con)
         data_extracao = datetime.now()
         for codigo in (433, 13521):
-            linhas = baixar_json(url_sgs(codigo))
+            linhas = baixar(url_sgs(codigo))
             inseridas = carregar_sgs(con, codigo, linhas, data_extracao)
             print(f"SGS {codigo}: {inseridas} linhas novas")
         inicio = data_inicial_focus(con)
-        linhas = paginar_focus(inicio)
+        linhas = paginar_focus(inicio, baixar=baixar)
         inseridas = carregar_focus(con, linhas, data_extracao)
         print(f"Focus desde {inicio}: {inseridas} linhas novas")
     finally:

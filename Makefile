@@ -1,4 +1,4 @@
-.PHONY: install carga painel test check
+.PHONY: install carga painel test check incremental
 
 install:
 	pip install -r requirements.txt
@@ -14,3 +14,6 @@ test:
 
 check:
 	ruff check .
+
+incremental:
+	python scripts/conferir_incremental.py
