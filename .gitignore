@@ -1,5 +1,6 @@
 dados/
 painel/dados.json
+painel/index.html
 __pycache__/
 .pytest_cache/
 .ruff_cache/
