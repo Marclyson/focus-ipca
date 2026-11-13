@@ -98,3 +98,22 @@ def test_montar_html_substitui_o_marcador_sem_recursos_externos():
     assert "<script src" not in html
     assert "http://" not in html
     assert "https://fonts" not in html
+
+def test_main_grava_o_painel_na_pasta_de_focus_ipca_painel(tmp_path, monkeypatch):
+    banco = tmp_path / "focus.duckdb"
+    con = duckdb.connect(str(banco))
+    try:
+        extrair.criar_tabelas(con)
+        popular(con)
+    finally:
+        con.close()
+
+    saida = tmp_path / "saida"
+    monkeypatch.setenv("FOCUS_IPCA_DB", str(banco))
+    monkeypatch.setenv("FOCUS_IPCA_PAINEL", str(saida))
+    monkeypatch.chdir(tmp_path)
+    exportar.main()
+
+    assert (saida / "index.html").exists()
+    assert (saida / "dados.json").exists()
+    assert not (tmp_path / "painel").exists()

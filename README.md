@@ -15,6 +15,7 @@ Nenhuma é obrigatória: as APIs do Banco Central são abertas e o projeto não 
 
 - `FOCUS_IPCA_DB`: caminho do banco DuckDB (padrão `dados/focus_ipca.duckdb`).
 - `FOCUS_IPCA_AMOSTRA`: pasta com amostras em JSON; quando definida, a carga lê dali em vez da rede (usada na CI).
+- `FOCUS_IPCA_PAINEL`: pasta onde o painel é gravado (padrão `painel`). A conferência da CI grava numa pasta temporária, para não sobrescrever o painel com a amostra.
 
 ## Dados
 

@@ -58,6 +58,7 @@ def main():
         caminho = str(Path(temporario) / "focus_ipca.duckdb")
         os.environ["FOCUS_IPCA_DB"] = caminho
         os.environ["FOCUS_IPCA_AMOSTRA"] = str(RAIZ / "tests" / "fixtures")
+        os.environ["FOCUS_IPCA_PAINEL"] = str(Path(temporario) / "painel")
         primeira = rodar(caminho)
         segunda = rodar(caminho)
 
