@@ -5,4 +5,5 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 *.duckdb
-.venv/
+.venv/.env
+*.pem

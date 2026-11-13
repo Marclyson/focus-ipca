@@ -9,6 +9,13 @@ Quanto o mercado erra a inflação, e com quanto tempo de antecedência ele acer
 - `make painel`
 - `make test`
 
+## Variáveis de ambiente
+
+Nenhuma é obrigatória: as APIs do Banco Central são abertas e o projeto não usa segredo.
+
+- `FOCUS_IPCA_DB`: caminho do banco DuckDB (padrão `dados/focus_ipca.duckdb`).
+- `FOCUS_IPCA_AMOSTRA`: pasta com amostras em JSON; quando definida, a carga lê dali em vez da rede (usada na CI).
+
 ## Dados
 
 Boletim Focus e séries do SGS (IPCA, código 433; meta de inflação, código 13521), do Banco Central do Brasil, licença ODbL; o IPCA é produzido pelo IBGE; código sob MIT.
