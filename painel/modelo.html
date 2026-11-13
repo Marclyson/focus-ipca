@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quanto o mercado erra a inflação?</title>
+<style>
+:root {
+  --amarelo: #f2c811;
+  --barra: #d4a50a;
+  --tinta: #252423;
+  --tinta-2: #4a4846;
+  --tinta-3: #6f6c69;
+  --linha: #e6e4e1;
+  --fundo: #f6f5f3;
+  --cartao: #ffffff;
+  --azul: #2f5f9e;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--fundo);
+  color: var(--tinta);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.45;
+}
+.uma-coluna {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+}
+header h1 {
+  font-size: 1.6rem;
+  line-height: 1.2;
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
+}
+header p.sub {
+  margin: 0 0 20px;
+  color: var(--tinta-2);
+  font-size: 0.95rem;
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.cartao {
+  background: var(--cartao);
+  border: 1px solid var(--linha);
+  border-radius: 2px;
+  padding: 14px 14px 12px;
+}
+.cartao .rotulo {
+  display: block;
+  color: var(--tinta-3);
+  font-size: 0.78rem;
+  line-height: 1.3;
+  margin-bottom: 8px;
+}
+.cartao .valor {
+  display: block;
+  font-size: 1.75rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--tinta);
+}
+.cartao .unidade {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--tinta-3);
+  margin-left: 3px;
+}
+section.grafico {
+  background: var(--cartao);
+  border: 1px solid var(--linha);
+  border-radius: 2px;
+  padding: 16px 16px 10px;
+  margin-bottom: 18px;
+}
+section.grafico h2 {
+  font-size: 1.05rem;
+  margin: 0 0 4px;
+  font-weight: 650;
+}
+section.grafico .ajuda {
+  margin: 0 0 10px;
+  color: var(--tinta-3);
+  font-size: 0.82rem;
+}
+.controles {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  color: var(--tinta-2);
+}
+.controles select {
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--tinta);
+  background: var(--cartao);
+  border: 1px solid var(--linha);
+  border-radius: 2px;
+  padding: 3px 6px;
+  font-variant-numeric: tabular-nums;
+}
+svg { display: block; width: 100%; height: auto; }
+svg text {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  fill: var(--tinta-3);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+svg text.valor { fill: var(--tinta); font-weight: 600; }
+svg .grade { stroke: var(--linha); stroke-width: 1; }
+svg .eixo-zero { stroke: var(--tinta-3); stroke-width: 1; }
+svg .banda { fill: #fdf6d6; }
+svg .linha-ano { fill: none; stroke: #c9c6c2; stroke-width: 1.5; }
+svg .linha-destaque { fill: none; stroke: var(--tinta); stroke-width: 2.5; }
+svg .ponto { fill: var(--tinta); }
+svg .alvo { fill: transparent; }
+svg .barra-h { fill: var(--amarelo); stroke: var(--barra); stroke-width: 1; }
+svg .barra-v { fill: var(--amarelo); }
+svg .serie-ipca { fill: none; stroke: var(--tinta); stroke-width: 2; }
+svg .serie-focus { fill: none; stroke: var(--azul); stroke-width: 2; }
+svg .serie-meta { fill: none; stroke: var(--tinta-3); stroke-width: 2; stroke-dasharray: 5 4; }
+.legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 0.82rem;
+  color: var(--tinta-2);
+  margin: 0 0 8px;
+}
+.legenda span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.legenda i {
+  width: 18px;
+  height: 0;
+  border-top: 2px solid var(--tinta);
+  display: inline-block;
+}
+.legenda i.azul { border-top-color: var(--azul); }
+.legenda i.meta { border-top: 2px dashed var(--tinta-3); }
+section.como-ler {
+  margin-top: 24px;
+}
+section.como-ler h2 {
+  font-size: 1.1rem;
+  margin: 0 0 8px;
+}
+section.como-ler p {
+  margin: 0 0 10px;
+  color: var(--tinta-2);
+  max-width: 70ch;
+}
+.rodape {
+  margin-top: 28px;
+  padding-top: 14px;
+  border-top: 1px solid var(--linha);
+  color: var(--tinta-3);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+@media (max-width: 480px) {
+  .uma-coluna { padding: 18px 12px 32px; }
+  header h1 { font-size: 1.35rem; }
+  .cartao .valor { font-size: 1.45rem; }
+  section.grafico { padding: 14px 10px 8px; }
+}
+</style>
+</head>
+<body>
+<div class="uma-coluna">
+  <header>
+    <h1>Quanto o mercado erra a inflação?</h1>
+    <p class="sub" id="subtitulo">Boletim Focus (mediana) contra o IPCA realizado, 2000 a 2024</p>
+  </header>
+
+  <div class="cards" id="cartoes"></div>
+
+  <section class="grafico">
+    <h2>Como a projeção converge</h2>
+    <p class="ajuda">Erro da mediana do Focus em pontos percentuais, por mês de antecedência. A faixa amarela vai de -0,5 a +0,5 p.p.</p>
+    <div class="controles">
+      <label for="seletor-ano">Ano de referência</label>
+      <select id="seletor-ano"></select>
+    </div>
+    <div id="grafico-convergencia"></div>
+  </section>
+
+  <section class="grafico">
+    <h2>Erro médio por antecedência</h2>
+    <p class="ajuda">Erro absoluto médio em p.p., agrupado pelas faixas de antecedência.</p>
+    <div id="grafico-horizontes"></div>
+  </section>
+
+  <section class="grafico">
+    <h2>Projeção do início do ano, meta e IPCA</h2>
+    <p class="ajuda">IPCA realizado, mediana do Focus no início do ano e meta vigente, em p.p.</p>
+    <div class="legenda">
+      <span><i></i>IPCA realizado</span>
+      <span><i class="azul"></i>Mediana do Focus no início do ano</span>
+      <span><i class="meta"></i>Meta</span>
+    </div>
+    <div id="grafico-projecao"></div>
+  </section>
+
+  <section class="grafico">
+    <h2>Quanto o Focus errou em cada ano</h2>
+    <p class="ajuda">Diferença entre a mediana do início do ano e o IPCA realizado, em p.p. Acima do zero, o Focus projetou inflação maior que a observada.</p>
+    <div id="grafico-erro-ano"></div>
+  </section>
+
+  <section class="como-ler">
+    <h2>Como ler</h2>
+    <p><strong>Como a projeção converge:</strong> cada linha representa um ano. Quanto mais à direita, mais perto do fim do ano está a projeção. As linhas que entram cedo na faixa amarela e ali permanecem indicam previsões que já estavam próximas do resultado.</p>
+    <p><strong>Erro médio por antecedência:</strong> mostra em quais prazos o mercado erra mais. Barras maiores significam erro absoluto médio maior naquela faixa de antecedência.</p>
+    <p><strong>Projeção do início do ano, meta e IPCA:</strong> compara o que o Focus previa no começo do ano com a meta e com o IPCA que de fato foi registrado.</p>
+    <p><strong>Quanto o Focus errou em cada ano:</strong> barras para cima indicam projeção acima do IPCA realizado; para baixo, projeção abaixo.</p>
+  </section>
+
+  <footer class="rodape">
+    Fonte: Banco Central do Brasil (Boletim Focus e SGS, séries 433 e 13521), licença ODbL. IPCA produzido pelo IBGE. Projeto de estudo da Dome Analytics, sem relação com o Banco Central.
+  </footer>
+</div>
+
+<script type="application/json" id="dados">/*DADOS*/</script>
+<script>
+(function () {
+  "use strict";
+
+  var D = JSON.parse(document.getElementById("dados").textContent);
+  var NIL = "n/d";
+
+  function numero(valor, casas) {
+    if (valor === null || valor === undefined || isNaN(valor)) return NIL;
+    return Number(valor).toLocaleString("pt-BR", {
+      minimumFractionDigits: casas,
+      maximumFractionDigits: casas
+    });
+  }
+
+  function inteiro(valor) {
+    if (valor === null || valor === undefined || isNaN(valor)) return NIL;
+    return Math.round(Number(valor)).toLocaleString("pt-BR");
+  }
+
+  function texto(valor) {
+    if (valor === null || valor === undefined || valor === "") return NIL;
+    return String(valor);
+  }
+
+  function ultimoAno() {
+    var lista = D.ipca_anual || [];
+    if (!lista.length) return "2024";
+    return lista[lista.length - 1].ano;
+  }
+
+  document.getElementById("subtitulo").textContent =
+    "Boletim Focus (mediana) contra o IPCA realizado, 2000 a " + ultimoAno();
+
+  function cartao(rotulo, valor, unidade) {
+    return (
+      '<div class="cartao">' +
+      '<span class="rotulo">' + rotulo + "</span>" +
+      '<span class="valor">' + valor +
+      (unidade ? '<span class="unidade">' + unidade + "</span>" : "") +
+      "</span></div>"
+    );
+  }
+
+  var resumo = D.resumo || {};
+  document.getElementById("cartoes").innerHTML =
+    cartao("anos analisados", inteiro(resumo.anos)) +
+    cartao("erro médio com 12 a 24 meses de antecedência", numero(resumo.erro_12_24, 2), "p.p.") +
+    cartao("erro médio a até 3 meses", numero(resumo.erro_ate_3, 2), "p.p.") +
+    cartao("mediana de dias antes do fim do ano em que a projeção fica a menos de 0,5 p.p. e não sai mais", inteiro(resumo.dias_convergencia_mediana));
+
+  var MESES_POR_DIA = 1 / 30.4375;
+  var DIAS_JANELA = 36;
+
+  function todosOsPontos() {
+    var pontos = [];
+    Object.keys(D.curvas || {}).forEach(function (ano) {
+      (D.curvas[ano] || []).forEach(function (par) {
+        if (par[1] !== null && par[1] !== undefined) {
+          pontos.push({ ano: Number(ano), dias: Number(par[0]), erro: Number(par[1]) });
+        }
+      });
+    });
+    return pontos;
+  }
+
+  var pontos = todosOsPontos();
+  var anosDisponiveis = Object.keys(D.curvas || {}).map(Number).sort(function (a, b) { return a - b; });
+  var anoSelecionado = null;
+  if (anosDisponiveis.length) {
+    anoSelecionado = resumo.maior_erro_ano;
+    if (!anoSelecionado || anosDisponiveis.indexOf(Number(anoSelecionado)) === -1) {
+      anoSelecionado = anosDisponiveis[anosDisponiveis.length - 1];
+    }
+  }
+
+  var seletor = document.getElementById("seletor-ano");
+  anosDisponiveis.slice().reverse().forEach(function (ano) {
+    var opcao = document.createElement("option");
+    opcao.value = String(ano);
+    opcao.textContent = String(ano);
+    seletor.appendChild(opcao);
+  });
+  seletor.value = String(anoSelecionado);
+  seletor.addEventListener("change", function () {
+    anoSelecionado = Number(seletor.value);
+    desenharConvergencia();
+  });
+
+  function largura(id) {
+    var elemento = document.getElementById(id);
+    var medida = elemento ? elemento.clientWidth : 720;
+    return Math.max(280, Math.floor(medida || 720));
+  }
+
+  function escalaLinear(dominioMin, dominioMax, saidaMin, saidaMax) {
+    var span = dominioMax - dominioMin || 1;
+    return function (valor) {
+      return saidaMin + ((valor - dominioMin) / span) * (saidaMax - saidaMin);
+    };
+  }
+
+  function caminho(seq) {
+    return seq.map(function (ponto, indice) {
+      return (indice === 0 ? "M" : "L") + ponto[0].toFixed(2) + " " + ponto[1].toFixed(2);
+    }).join(" ");
+  }
+
+  function marcasRedondas(min, max) {
+    var bruto = (max - min) / 6, potencia = Math.pow(10, Math.floor(Math.log10(bruto)));
+    var passo = [1, 2, 2.5, 5, 10].map(function (f) { return f * potencia; }).find(function (s) { return s >= bruto; });
+    var lista = [];
+    for (var v = Math.ceil(min / passo) * passo; v <= max + 1e-9; v += passo) lista.push(Math.abs(v) < 1e-9 ? 0 : v);
+    return lista;
+  }
+
+  function desenharConvergencia() {
+    var L = 52, R = 14, T = 16, B = 36, W = largura("grafico-convergencia"), H = 340;
+    var pw = W - L - R, ph = H - T - B;
+    var minErro = -0.6, maxErro = 0.6;
+    pontos.forEach(function (p) {
+      if (p.erro < minErro) minErro = p.erro;
+      if (p.erro > maxErro) maxErro = p.erro;
+    });
+    var folga = (maxErro - minErro) * 0.08;
+    minErro -= folga;
+    maxErro += folga;
+
+    var x = function (dias) {
+      var meses = Math.max(0, Math.min(DIAS_JANELA, dias * MESES_POR_DIA));
+      return L + pw * (DIAS_JANELA - meses) / DIAS_JANELA;
+    };
+    var y = escalaLinear(minErro, maxErro, T + ph, T);
+
+    var svg = ['<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Convergência da projeção do Focus">'];
+
+    svg.push('<rect class="banda" x="' + L + '" y="' + y(0.5).toFixed(2) + '" width="' + pw + '" height="' + Math.max(0, y(-0.5) - y(0.5)).toFixed(2) + '"></rect>');
+
+    marcasRedondas(minErro, maxErro).forEach(function (valor) {
+      var yy = y(valor);
+      svg.push('<line class="grade" x1="' + L + '" y1="' + yy.toFixed(2) + '" x2="' + (L + pw) + '" y2="' + yy.toFixed(2) + '"></line>');
+      svg.push('<text x="' + (L - 6) + '" y="' + (yy + 4).toFixed(2) + '" text-anchor="end">' + numero(valor, 1) + "</text>");
+    });
+
+    for (var m = 0; m <= DIAS_JANELA; m += 6) {
+      var xx = L + pw * (DIAS_JANELA - m) / DIAS_JANELA;
+      svg.push('<line class="grade" x1="' + xx.toFixed(2) + '" y1="' + T + '" x2="' + xx.toFixed(2) + '" y2="' + (T + ph) + '"></line>');
+      svg.push('<text x="' + xx.toFixed(2) + '" y="' + (T + ph + 16) + '" text-anchor="middle">' + m + "</text>");
+    }
+
+    svg.push('<line class="eixo-zero" x1="' + L + '" y1="' + y(0).toFixed(2) + '" x2="' + (L + pw) + '" y2="' + y(0).toFixed(2) + '"></line>');
+    svg.push('<text x="' + (L + pw / 2) + '" y="' + (H - 4) + '" text-anchor="middle">Meses até o fim do ano</text>');
+
+    Object.keys(D.curvas || {}).forEach(function (chave) {
+      var ano = Number(chave);
+      if (ano === anoSelecionado) return;
+      var seq = (D.curvas[chave] || []).map(function (par) { return [x(par[0]), y(par[1])]; });
+      if (seq.length > 1) svg.push('<path class="linha-ano" d="' + caminho(seq) + '"></path>');
+    });
+
+    var destaque = D.curvas[String(anoSelecionado)] || [];
+    var seqDestaque = destaque.map(function (par) { return [x(par[0]), y(par[1])]; });
+    if (seqDestaque.length > 1) {
+      svg.push('<path class="linha-destaque" d="' + caminho(seqDestaque) + '"></path>');
+    }
+    destaque.forEach(function (par, indice) {
+      var cx = seqDestaque[indice][0], cy = seqDestaque[indice][1];
+      svg.push('<circle class="ponto" cx="' + cx.toFixed(2) + '" cy="' + cy.toFixed(2) + '" r="3"><title>' +
+        anoSelecionado + ": " + numero(par[1], 2) + " p.p. a " + Math.round(par[0] * MESES_POR_DIA) + " meses do fim</title></circle>");
+    });
+
+    pontos.forEach(function (p) {
+      if (p.ano === anoSelecionado) return;
+      svg.push('<circle class="alvo" cx="' + x(p.dias).toFixed(2) + '" cy="' + y(p.erro).toFixed(2) + '" r="7"><title>' +
+        p.ano + ": " + numero(p.erro, 2) + " p.p. a " + Math.round(p.dias * MESES_POR_DIA) + " meses do fim</title></circle>");
+    });
+
+    svg.push("</svg>");
+    document.getElementById("grafico-convergencia").innerHTML = svg.join("");
+  }
+
+  function desenharHorizontes() {
+    var faixas = D.horizontes || [];
+    var L = 132, R = 64, T = 14, B = 16, W = largura("grafico-horizontes"), linha = 40;
+    var H = T + B + Math.max(1, faixas.length) * linha;
+    var pw = W - L - R;
+    var maximo = 0;
+    faixas.forEach(function (f) {
+      if (f.erro_abs_medio !== null && f.erro_abs_medio !== undefined && f.erro_abs_medio > maximo) maximo = f.erro_abs_medio;
+    });
+    if (maximo <= 0) maximo = 1;
+
+    var svg = ['<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Erro médio por antecedência">'];
+    faixas.forEach(function (f, indice) {
+      var y = T + indice * linha;
+      var larguraBarra = Math.max(0, (Number(f.erro_abs_medio) || 0) / maximo) * pw;
+      svg.push('<rect class="barra-h" x="' + L + '" y="' + (y + 8) + '" width="' + larguraBarra.toFixed(2) + '" height="' + (linha - 18) + '"></rect>');
+      svg.push('<text x="' + (L - 8) + '" y="' + (y + linha / 2 + 3) + '" text-anchor="end">' + texto(f.faixa) + "</text>");
+      svg.push('<text class="valor" x="' + (L + larguraBarra + 7).toFixed(2) + '" y="' + (y + linha / 2 + 3) + '">' + numero(f.erro_abs_medio, 2) + " p.p.</text>");
+    });
+    svg.push("</svg>");
+    document.getElementById("grafico-horizontes").innerHTML = svg.join("");
+  }
+
+  function desenharProjecao() {
+    var anos = (D.ipca_anual || []).map(function (a) { return a.ano; });
+    var metaPorAno = {};
+    (D.ipca_anual || []).forEach(function (a) {
+      if (a.meta !== null && a.meta !== undefined) metaPorAno[a.ano] = a.meta;
+    });
+    var focoPorAno = {};
+    (D.focus_meta || []).forEach(function (f) {
+      focoPorAno[f.ano] = { mediana: f.mediana_inicio, ipca: f.ipca };
+    });
+
+    var valores = [];
+    (D.ipca_anual || []).forEach(function (a) {
+      if (a.ipca !== null && a.ipca !== undefined) valores.push(Number(a.ipca));
+      if (metaPorAno[a.ano] !== undefined) valores.push(Number(metaPorAno[a.ano]));
+    });
+    (D.focus_meta || []).forEach(function (f) {
+      if (f.mediana_inicio !== null && f.mediana_inicio !== undefined) valores.push(Number(f.mediana_inicio));
+    });
+    var minV = Math.min.apply(null, valores.concat([0]));
+    var maxV = Math.max.apply(null, valores.concat([0]));
+    var folga = (maxV - minV) * 0.1 || 1;
+    minV -= folga;
+    maxV += folga;
+
+    var L = 46, R = 14, T = 16, B = 38, W = largura("grafico-projecao"), H = 330;
+    var pw = W - L - R, ph = H - T - B;
+    var n = anos.length;
+    var x = function (indice) { return n <= 1 ? L + pw / 2 : L + pw * indice / (n - 1); };
+    var y = escalaLinear(minV, maxV, T + ph, T);
+
+    var svg = ['<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Projeção do início do ano, meta e IPCA">'];
+
+    marcasRedondas(minV, maxV).forEach(function (valor) {
+      var yy = y(valor);
+      svg.push('<line class="grade" x1="' + L + '" y1="' + yy.toFixed(2) + '" x2="' + (L + pw) + '" y2="' + yy.toFixed(2) + '"></line>');
+      svg.push('<text x="' + (L - 6) + '" y="' + (yy + 4).toFixed(2) + '" text-anchor="end">' + numero(valor, 1) + "</text>");
+    });
+
+    var passo = Math.max(1, Math.ceil(n / 8));
+    anos.forEach(function (ano, indice) {
+      if ((n - 1 - indice) % passo !== 0) return;
+      svg.push('<text x="' + x(indice).toFixed(2) + '" y="' + (T + ph + 16) + '" text-anchor="middle">' + ano + "</text>");
+    });
+
+    function serie(rotina, classe, pegar) {
+      var seq = [];
+      anos.forEach(function (ano, indice) {
+        var valor = pegar(ano);
+        if (valor !== null && valor !== undefined && !isNaN(valor)) {
+          seq.push([x(indice), y(Number(valor))]);
+        }
+      });
+      if (seq.length) svg.push('<path class="' + classe + '" d="' + caminho(seq) + '"></path>');
+    }
+
+    serie("meta", "serie-meta", function (ano) { return metaPorAno[ano]; });
+    serie("ipca", "serie-ipca", function (ano) {
+      var a = (D.ipca_anual || []).find(function (item) { return item.ano === ano; });
+      return a ? a.ipca : null;
+    });
+    serie("focus", "serie-focus", function (ano) {
+      return focoPorAno[ano] ? focoPorAno[ano].mediana : null;
+    });
+
+    svg.push("</svg>");
+    document.getElementById("grafico-projecao").innerHTML = svg.join("");
+  }
+
+  function desenharErroAno() {
+    var barras = (D.focus_meta || []).filter(function (f) {
+      return f.mediana_inicio !== null && f.mediana_inicio !== undefined &&
+        f.ipca !== null && f.ipca !== undefined;
+    }).map(function (f) {
+      return { ano: f.ano, erro: Number(f.mediana_inicio) - Number(f.ipca) };
+    });
+    if (!barras.length) {
+      document.getElementById("grafico-erro-ano").innerHTML = "";
+      return;
+    }
+    var maxAbs = 0;
+    barras.forEach(function (b) { if (Math.abs(b.erro) > maxAbs) maxAbs = Math.abs(b.erro); });
+    maxAbs = maxAbs || 1;
+    maxAbs *= 1.15;
+
+    var L = 46, R = 14, T = 16, B = 38, W = largura("grafico-erro-ano"), H = 320;
+    var pw = W - L - R, ph = H - T - B;
+    var y = escalaLinear(-maxAbs, maxAbs, T + ph, T);
+    var zero = y(0);
+    var espaco = pw / barras.length;
+    var larguraBarra = Math.max(3, Math.min(26, espaco * 0.62));
+
+    var svg = ['<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Erro do Focus em cada ano">'];
+
+    marcasRedondas(-maxAbs, maxAbs).forEach(function (valor) {
+      var yy = y(valor);
+      svg.push('<line class="grade" x1="' + L + '" y1="' + yy.toFixed(2) + '" x2="' + (L + pw) + '" y2="' + yy.toFixed(2) + '"></line>');
+      svg.push('<text x="' + (L - 6) + '" y="' + (yy + 4).toFixed(2) + '" text-anchor="end">' + numero(valor, 1) + "</text>");
+    });
+
+    barras.forEach(function (b, indice) {
+      var cx = L + espaco * (indice + 0.5);
+      var yTop = b.erro >= 0 ? y(b.erro) : zero;
+      var altura = Math.abs(y(b.erro) - zero);
+      svg.push('<rect class="barra-v" x="' + (cx - larguraBarra / 2).toFixed(2) + '" y="' + yTop.toFixed(2) + '" width="' + larguraBarra.toFixed(2) + '" height="' + altura.toFixed(2) + '"><title>' +
+        b.ano + ": " + numero(b.erro, 2) + " p.p.</title></rect>");
+      if ((barras.length - 1 - indice) % Math.max(1, Math.ceil(barras.length / 10)) === 0) {
+        svg.push('<text x="' + cx.toFixed(2) + '" y="' + (T + ph + 16) + '" text-anchor="middle">' + b.ano + "</text>");
+      }
+    });
+
+    svg.push('<line class="eixo-zero" x1="' + L + '" y1="' + zero.toFixed(2) + '" x2="' + (L + pw) + '" y2="' + zero.toFixed(2) + '"></line>');
+    svg.push('<text x="' + (L + pw / 2) + '" y="' + (H - 4) + '" text-anchor="middle">Ano</text>');
+
+    svg.push("</svg>");
+    document.getElementById("grafico-erro-ano").innerHTML = svg.join("");
+  }
+
+  function desenharTudo() {
+    desenharConvergencia();
+    desenharHorizontes();
+    desenharProjecao();
+    desenharErroAno();
+  }
+
+  desenharTudo();
+
+  var pendente = null;
+  window.addEventListener("resize", function () {
+    if (pendente) cancelAnimationFrame(pendente);
+    pendente = requestAnimationFrame(function () {
+      pendente = null;
+      desenharTudo();
+    });
+  });
+})();
+</script>
+</body>
+</html>
